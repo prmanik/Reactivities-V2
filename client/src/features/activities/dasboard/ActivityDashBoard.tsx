@@ -4,15 +4,13 @@ import ActivityDetails from '../details/ActivityDetails'
 import ActivityForm from '../form/ActivityForm'
 
 type Props = {
-    activities: Activity[]
+    activities: Activity[] | undefined
     onActivitySelect: (id: string) => void
     onActivityCancel: () => void
     selectedActivity: Activity | undefined
     onFormOpen: (id: string) => void
     onFormClose: () => void
     editMode: boolean
-    onCreateOrEdit: (activity: Activity) => void
-    deleteActivity: (id: string) => void
 }
 
 export default function ActivityDashBoard({ activities,
@@ -21,9 +19,7 @@ export default function ActivityDashBoard({ activities,
     selectedActivity,
     onFormOpen,
     onFormClose,
-    editMode,
-    onCreateOrEdit,
-    deleteActivity
+    editMode
 }: Props) {
     return (
         <Grid container spacing={3}>
@@ -31,23 +27,20 @@ export default function ActivityDashBoard({ activities,
                 <ActivityList
                     activities={activities}
                     onActivitySelect={onActivitySelect}
-                    deleteActivity={deleteActivity}
                 />
             </Grid>
             <Grid size={5}>
                 {selectedActivity && !editMode &&
                     <ActivityDetails
-                        activity={selectedActivity}
+                        selectedActivity={selectedActivity}
                         onActivityCancel={onActivityCancel}
                         onFormOpen={onFormOpen}
-
                     />
                 }
                 {editMode &&
                     <ActivityForm
                         onFormClose={onFormClose}
                         activity={selectedActivity}
-                        onCreateOrEdit={onCreateOrEdit}
                     />
                 }
             </Grid>
