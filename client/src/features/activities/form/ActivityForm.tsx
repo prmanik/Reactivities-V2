@@ -1,14 +1,13 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import type { SubmitEvent } from "react";
 import { useActivities } from "../../../lib/hooks/useActivities";
+import { useParams, useNavigate } from "react-router";
 
-type Props = {
-    activity?: Activity
-    onFormClose: () => void
-}
+export default function ActivityForm() {
+    const { id } = useParams();
+    const { updateActivity, createActivity, activity, isLoadingActivity } = useActivities(id);
+    const navigate = useNavigate();
 
-export default function ActivityForm({ activity, onFormClose }: Props) {
-    const { updateActivity, createActivity } = useActivities();
     const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -21,19 +20,24 @@ export default function ActivityForm({ activity, onFormClose }: Props) {
 
         if (activity) {
             data.id = activity.id
-            await updateActivity.mutateAsync(data as unknown as Activity)
-            onFormClose();
+            await updateActivity.mutateAsync(data as unknown as Activity);
+            navigate(`/activities/${activity.id}`);
         }
         else {
-            await createActivity.mutateAsync(data as unknown as Activity)
-            onFormClose();
+            createActivity.mutate(data as unknown as Activity, {
+                onSuccess: (id) => {
+                    navigate(`/activities/${id}`);
+                }
+            });
         }
     }
+
+    if (isLoadingActivity) return <Typography>Loading...</Typography>
 
     return (
         <Paper sx={{ borderradius: 3, padding: 3 }}>
             <Typography variant="h4" gutterBottom color="primary">
-                Create Activity
+                {activity ? 'Edit Activity' : 'Create Activity'}
             </Typography>
             <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={3}>
                 <TextField name="title" label="Title" defaultValue={activity?.title} />
@@ -46,7 +50,7 @@ export default function ActivityForm({ activity, onFormClose }: Props) {
                 <TextField name="city" label="City" defaultValue={activity?.city} />
                 <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
                 <Box display="flex" justifyContent="end" gap={3}>
-                    <Button color="inherit" onClick={onFormClose}>
+                    <Button color="inherit" onClick={() => navigate(activity ? `/activities/${activity.id}` : '/activities')}>
                         Cancel
                     </Button>
                     <Button
